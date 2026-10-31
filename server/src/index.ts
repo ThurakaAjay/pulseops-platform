@@ -1,5 +1,7 @@
 import express from 'express';
 import http from 'node:http';
+import path from 'node:path';
+import fs from 'node:fs';
 import cors from 'cors';
 import { Server as SocketIOServer } from 'socket.io';
 import { initDatabase } from './db/index.js';
@@ -25,7 +27,7 @@ app.use(express.json());
 initDatabase();
 seedDatabase();
 
-// Mount Routes
+// Mount API Routes
 app.use('/api/auth', authRouter);
 app.use('/api/services', servicesRouter);
 app.use('/api/incidents', incidentsRouter);
@@ -37,6 +39,27 @@ app.use('/api/simulate', simulateRouter);
 app.get('/api/health', (req, res) => {
   res.json({ status: 'healthy', timestamp: new Date().toISOString(), version: '1.0.0' });
 });
+
+// Serve frontend client dist in production if it exists
+const possibleClientPaths = [
+  path.resolve(process.cwd(), '../client/dist'),
+  path.resolve(process.cwd(), 'client/dist'),
+  path.resolve(process.cwd(), 'dist/client')
+];
+
+let clientDistPath = possibleClientPaths.find(p => fs.existsSync(p));
+
+if (clientDistPath) {
+  console.log(`📦 Serving production client assets from: ${clientDistPath}`);
+  app.use(express.static(clientDistPath));
+
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api') || req.path.startsWith('/socket.io')) {
+      return next();
+    }
+    res.sendFile(path.join(clientDistPath!, 'index.html'));
+  });
+}
 
 // Create HTTP and WebSocket server
 const server = http.createServer(app);
