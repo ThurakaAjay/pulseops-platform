@@ -1,0 +1,26 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: order-service-vs
+  namespace: kubesphere-production
+spec:
+  hosts:
+    - order-service
+  http:
+    - name: canary-traffic-shift
+      route:
+        # 90% Stable v1 traffic
+        - destination:
+            host: order-service
+            subset: v1
+          weight: 90
+        # 10% Canary v2 traffic
+        - destination:
+            host: order-service
+            subset: v2
+          weight: 10
+      timeout: 2.5s
+      retries:
+        attempts: 3
+        perTryTimeout: 500ms
+        retryOn: "5xx,connect-failure,refused-stream"

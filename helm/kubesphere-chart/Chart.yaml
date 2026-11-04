@@ -1,0 +1,14 @@
+apiVersion: v2
+name: kubesphere-chart
+description: Enterprise Helm Chart for Zero-Downtime Microservices & Istio Service Mesh
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - kubernetes
+  - microservices
+  - istio
+  - devops
+maintainers:
+  - name: Thuraka Ajay
+    email: thurakaajay@users.noreply.github.com

@@ -12,6 +12,7 @@ import { IncidentWarRoom } from './pages/IncidentWarRoom.js';
 import { SprintKanban } from './pages/SprintKanban.js';
 import { SupportDesk } from './pages/SupportDesk.js';
 import { Analytics } from './pages/Analytics.js';
+import { DevOpsPlatform } from './pages/DevOpsPlatform.js';
 
 const MainLayout: React.FC = () => {
   const [currentTab, setCurrentTab] = useState('dashboard');
@@ -53,6 +54,7 @@ const MainLayout: React.FC = () => {
           {currentTab === 'tasks' && <SprintKanban />}
           {currentTab === 'support' && <SupportDesk />}
           {currentTab === 'analytics' && <Analytics />}
+          {currentTab === 'devops' && <DevOpsPlatform />}
         </main>
       </div>
 

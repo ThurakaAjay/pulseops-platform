@@ -6,7 +6,8 @@ import {
   KanbanSquare, 
   Headphones, 
   BarChart3, 
-  Radio
+  Radio,
+  Layers
 } from 'lucide-react';
 import { useLive } from '../context/LiveContext.js';
 
@@ -20,7 +21,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab, openI
   const { liveServices } = useLive();
   const degradedOrOutageCount = liveServices.filter(s => s.status !== 'operational').length;
 
-  const navItems = [
+  const appNavItems = [
     {
       id: 'dashboard',
       label: 'Executive Overview',
@@ -57,6 +58,16 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab, openI
     }
   ];
 
+  const devopsNavItems = [
+    {
+      id: 'devops',
+      label: 'Kubernetes & DevOps',
+      icon: Layers,
+      badge: 'GitOps',
+      badgeColor: 'blue'
+    }
+  ];
+
   return (
     <aside className="w-64 border-r border-slate-800/80 bg-dark-900/60 backdrop-blur-md flex flex-col justify-between p-4 shrink-0">
       <div className="space-y-6">
@@ -65,7 +76,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab, openI
             Operations & Control
           </p>
           <nav className="space-y-1">
-            {navItems.map(item => {
+            {appNavItems.map(item => {
               const Icon = item.icon;
               const isActive = currentTab === item.id;
               return (
@@ -98,6 +109,40 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab, openI
             })}
           </nav>
         </div>
+
+        {/* DevOps & Cloud Platform Section */}
+        <div>
+          <p className="px-3 text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">
+            Cloud & Infrastructure
+          </p>
+          <nav className="space-y-1">
+            {devopsNavItems.map(item => {
+              const Icon = item.icon;
+              const isActive = currentTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => onSelectTab(item.id)}
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all duration-150 ${
+                    isActive
+                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25'
+                      : 'text-slate-400 hover:text-white hover:bg-dark-800'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                    <span>{item.label}</span>
+                  </div>
+                  {item.badge && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                      {item.badge}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </nav>
+        </div>
       </div>
 
       {/* Real-Time WebSocket Engine Footer Status */}
@@ -112,7 +157,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab, openI
           </span>
         </div>
         <div className="mt-2 text-[10px] text-slate-500 font-mono flex justify-between">
-          <span>Latency: ~18ms</span>
+          <span>Cluster: EKS v1.30</span>
           <span>Sync: Sub-50ms</span>
         </div>
       </div>

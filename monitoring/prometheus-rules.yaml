@@ -1,0 +1,47 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: kubesphere-sre-alerts
+  namespace: monitoring
+  labels:
+    role: alert-rules
+    prometheus: k8s
+spec:
+  groups:
+    - name: MicroservicesSREAlerts
+      rules:
+        # Alert 1: 5xx Error Rate > 1% (Triggers Canary Rollback)
+        - alert: CanaryServiceHigh5xxErrorRate
+          expr: |
+            sum(rate(http_request_duration_seconds_count{code=~"5.."}[2m])) 
+            / 
+            sum(rate(http_request_duration_seconds_count[2m])) * 100 > 1
+          for: 1m
+          labels:
+            severity: critical
+            team: sre-oncall
+          annotations:
+            summary: "Canary v2 error rate exceeded 1% threshold"
+            description: "Order Service Canary is throwing 5xx errors. Automated Istio rollback suggested."
+
+        # Alert 2: High p99 Latency Breach
+        - alert: ServiceP99LatencyBreach
+          expr: |
+            histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) > 0.250
+          for: 3m
+          labels:
+            severity: warning
+          annotations:
+            summary: "p99 latency > 250ms SLA boundary"
+            description: "Service response time is degrading. Check HPA pod scaling."
+
+        # Alert 3: Pod CrashLoopBackOff
+        - alert: KubernetesPodCrashLooping
+          expr: |
+            rate(kube_pod_container_status_restarts_total[5m]) * 60 > 2
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Pod in CrashLoopBackOff"
+            description: "Pod {{ $labels.pod }} in {{ $labels.namespace }} is repeatedly restarting."
